@@ -4,6 +4,7 @@ build the Swin-UNet model and solve the ISIC 2018 Task 1
 the standard Swin-UNet network details are provided by https://github.com/HuCaoFighting/Swin-Unet/blob/main/networks/swin_transformer_unet_skip_expand_decoder_sys.py
 and https://bgithub.xyz/HuCaoFighting/Swin-Unet/blob/main/networks/vision_transformer.py provided the Swin-UNet network api.
 the process is provided as follows:
+```plaintxt
 Input Image (224x224x3)
 │
 ├─► [Patch Embedding] → (56x56x96)
@@ -55,3 +56,4 @@ Input Image (224x224x3)
 │           └─► [Output Conv] → (224x224xnum_classes)
 │
 └─► Ouput the Segmentation Image (224x224xnum_classes)
+```
