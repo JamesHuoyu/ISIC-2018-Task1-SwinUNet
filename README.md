@@ -1,8 +1,8 @@
 # ISIC-2018-Task1-SwinUNet
 build the Swin-UNet model and solve the ISIC 2018 Task 1
 ## Here the standard SwinUNet network
-the standard Swin-UNet network details are provided by https://github.com/HuCaoFighting/Swin-Unet/blob/main/networks/swin_transformer_unet_skip_expand_decoder_sys.py
-and https://bgithub.xyz/HuCaoFighting/Swin-Unet/blob/main/networks/vision_transformer.py provided the Swin-UNet network api.
+* the standard Swin-UNet network details are provided by https://github.com/HuCaoFighting/Swin-Unet/blob/main/networks/swin_transformer_unet_skip_expand_decoder_sys.py
+* https://bgithub.xyz/HuCaoFighting/Swin-Unet/blob/main/networks/vision_transformer.py provided the Swin-UNet network api.
 the process is provided as follows:
 ```plaintxt
 Input Image (224x224x3)
