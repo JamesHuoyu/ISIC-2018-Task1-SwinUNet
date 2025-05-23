@@ -38,17 +38,17 @@ Input Image (224x224x3)
 │
 ├─► [Patch Embedding] → (56x56x96)
 │   │
-│   ├─► [Stage1] → BasicLayer x2 → (56x56x96)
+│   ├─► [Stage1] → BasicLayer x2 → (56x56x96) → save as Skip1
 │   │   │
-│   │   └─► [Patch Merging] → (28x28x192) → save as Skip1
+│   │   └─► [Patch Merging] → (28x28x192) 
 │   │
-│   ├─► [Stage2] → BasicLayer x2 → (28x28x192)
+│   ├─► [Stage2] → BasicLayer x2 → (28x28x192) → save as Skip2
 │   │   │
-│   │   └─► [Patch Merging] → (14x14x384) → save as Skip2
+│   │   └─► [Patch Merging] → (14x14x384)
 │   │
-│   ├─► [Stage3] → BasicLayer x6 → (14x14x384)
+│   ├─► [Stage3] → BasicLayer x6 → (14x14x384) → save as Skip3
 │   │   │
-│   │   └─► [Patch Merging] → (7x7x768) → save as Skip3
+│   │   └─► [Patch Merging] → (7x7x768)
 │   │
 │   └─► [Stage4] → BasicLayer x2 → (7x7x768) → save as Bottleneck
 │
@@ -106,26 +106,21 @@ Input Image (224x224x3)
 │   │
 │   ├─► Up_Sampling1 (PatchExpand) → (14x14x384)
 │   │   ├─► concat with Skip1 (14x14x384) → (14x14x768)
-│   │   └─► Swin Block process → (14x14x384)
+│   │   └─► Swin Block process x2→ (14x14x384)
 │   │
 │   ├─► Up_Sampling2 (PatchExpand) → (28x28x192)
 │   │   ├─► concat with Skip2 (28x28x192) → (28x28x384)
-│   │   └─► Swin Block process → (28x28x192)
+│   │   └─► Swin Block process x2→ (28x28x192)
 │   │
 │   ├─► Up_Sampling3 (PatchExpand) → (56x56x96)
 │   │   ├─► concat with Skip3 (56x56x96) → (56x56x192)
-│   │   └─► Swin Block process → (56x56x96)
+│   │   └─► Swin Block process x2 → (56x56x96)
 │   │
 │   └─► Final Up_Sampling → (224x224x1) → Sigmoid Output
 │
 └─► Output Segmentation (224x224)
 ```
 ### Explaining our demo model
-* For encoder, we only **unfreeze** the Stage3 and Stage4 now
-```python
-if "layers.2" not in name and "layers.3" not in name:
-    param.requires_grad = False
-```
 * For **Up_Sampling** in decoder:
 ```python
 class PatchExpand:
@@ -134,13 +129,11 @@ class PatchExpand:
         x = x.view(B, H, W, 2, 2, self.output_dim)
         x = x.permute(0, 1, 3, 2, 4, 5) # Up Sampling 2x
 ```
-* **Concat with skip** which in this demo is really different from the standard model, we only use the **bilinear** now, which may lack some information. So it needs more work.
+* **Concat with skip** which in this demo is really different from the standard model, we only use the **nearest** now, for:
 ```python
-skip_ = F.interpolate(skip_, size=(H_x, W_x), mode='bilinear')
-x = torch.cat([x, skip], dim=-1)  # channels concating
+    skip_ = skip.view(B, H_skip, W_skip, C_skip).permute(0, 3, 1, 2)
+    skip_ = torch.nn.functional.interpolate(skip_, size=(H_x, W_x), mode='nearest')
+    skip = skip_.permute(0, 2, 3, 1).reshape(B, H_x * W_x, C_skip)
+x = torch.cat([x, skip],dim=-1)
 ```
-* **Output Setting** which is also very different from the standard model, it needs more work.
-```python
-x = F.interpolate(x, size=(224, 224), mode='bilinear')  # Final Up_Sampling
-x = self.final_proj(x)  # with 1x1 Convj
-```
+* **Output Setting** which uses interpolate with nearest mode first and then uses multi convj(3layers) from 56x56 into 224x224.
