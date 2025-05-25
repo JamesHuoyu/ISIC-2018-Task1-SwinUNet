@@ -105,15 +105,15 @@ Input Image (224x224x3)
 │   ├─► Initial input: (7x7x768)
 │   │
 │   ├─► Up_Sampling1 (PatchExpand) → (14x14x384)
-│   │   ├─► concat with Skip1 (14x14x384) → (14x14x768)
+│   │   ├─► concat with Skip1 (14x14x384) → 1x1 conv2d (14x14x768)
 │   │   └─► Swin Block process x2→ (14x14x384)
 │   │
 │   ├─► Up_Sampling2 (PatchExpand) → (28x28x192)
-│   │   ├─► concat with Skip2 (28x28x192) → (28x28x384)
+│   │   ├─► concat with Skip2 (28x28x192) → 1x1 conv2d (28x28x384)
 │   │   └─► Swin Block process x2→ (28x28x192)
 │   │
 │   ├─► Up_Sampling3 (PatchExpand) → (56x56x96)
-│   │   ├─► concat with Skip3 (56x56x96) → (56x56x192)
+│   │   ├─► concat with Skip3 (56x56x96) → 1x1 conv2d (56x56x192)
 │   │   └─► Swin Block process x2 → (56x56x96)
 │   │
 │   └─► Final Up_Sampling → (224x224x1) → Sigmoid Output
